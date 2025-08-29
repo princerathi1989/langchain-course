@@ -1,7 +1,7 @@
 from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 # from langchain_mistralai import ChatMistralAI
-from langchain_core.runnables import Runnable
+from langchain_core.runnables import RunnableLambda
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers.pydantic import PydanticOutputParser
 from langchain.agents.react.agent import create_react_agent
@@ -38,8 +38,12 @@ agent_executor = AgentExecutor(
     verbose=True
 )
 
+extract_output = RunnableLambda(lambda x: x['output'])
+parse_output = RunnableLambda(lambda x: output_parser.parse(x))
+chain = agent_executor | extract_output | parse_output
+
 def main():
-    result = agent_executor.invoke(input = {"input":"Search for 3 job postings for AWS,NodeJS, ANgular full stack developer with 14 years of experience in Noida in IT industry"})
+    result = chain.invoke(input = {"input":"Search for 3 job postings for AWS,NodeJS, ANgular full stack developer with 14 years of experience in Noida in IT industry"})
     print(result)
 
 
